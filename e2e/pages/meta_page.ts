@@ -334,24 +334,51 @@ export async function clickChangeWallet(page: Page) {
     return page;
 }
 
-// id missing
+// open chat panel
 export async function click_Open_Chat(page: Page) {
-    await this.page.locator(locators.chatOpenTrollbox).click();
+    await page.locator(locators.chatOpenTrollbox).click();
     return page;
 }
 
+// open chat pool drowdown
 export async function click_Chat_Room_Dropdown(page: Page) {
-    await this.page.locator(locators.chatRoomDropdown).click();
+    await page.locator(locators.chatOpenRoomDropdown).click();
+    return page;
+}
+
+// click chat sent message button
+export async function click_Chat_Sent_Message(page: Page) {
+    await page.locator(locators.chatSentMessage).click();
+    return page;
+}
+
+// click chat emoji panel open
+export async function click_Chat_Emoji_Panel(page: Page) {
+    await page.locator(locators.chatEmojipanel).click();
+    return page;
+}
+
+// click chat emoji
+export async function click_Chat_Emoj(page: Page) {
+    await page.click(
+        'button[aria-label="smiling face with heart-shaped eyes"]',
+    );
+    return page;
+}
+
+// click chat emoji panel close
+export async function click_Chat_Emoji_Panel_Close(page: Page) {
+    await page.locator(locators.chatEmojiPanelClose).click();
     return page;
 }
 
 // id needed
 export async function click_Select_Chat_Room(page: Page) {
-    await this.page.waitForSelector(
+    await page.waitForSelector(
         'div._dropdown_item_1p5ax_277[data-value="ETH / USDC"]',
         { timeout: 60000 },
     );
-    const elementHandle = await this.page.$(
+    const elementHandle = await page.$(
         'div._dropdown_item_1p5ax_277[data-value="ETH / USDC"]',
     );
 
@@ -362,6 +389,29 @@ export async function click_Select_Chat_Room(page: Page) {
     await elementHandle.click();
     // await this.page.getByText('ETH / WBTC').click();
     return page;
+}
+
+// asser sent message is visisble in chat
+export async function click_Chat_Emoji_Reaction(page: Page) {
+    // Execute script to scroll to the top of the chat container
+    await this.page.evaluate((xpath) => {
+        const chatContainer = document.evaluate(
+            xpath,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null,
+        ).singleNodeValue as HTMLElement;
+        if (chatContainer) {
+            chatContainer.scrollTop == 100;
+        } else {
+            console.log('Chat container not found');
+        }
+    }, locators.chatRoomScrollUpXpath);
+
+    const chatRoomScrollUp = this.page.locator(locators.chatRoomScrollUp);
+    // select a reaction for the message
+    await expect(chatRoomScrollUp);
 }
 
 // ---------------------------------------assert-----------------------------------
@@ -505,6 +555,223 @@ export async function assertWalletonnectivity(page: Page) {
     return page;
 }
 
+// asser sent message is visisble in chat
+export async function assert_Sent_Message(page: Page, str: string) {
+    await page.waitForTimeout(1000);
+    // Execute script to scroll to the top of the chat container
+    await this.page.evaluate((xpath) => {
+        const chatContainer = document.evaluate(
+            xpath,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null,
+        ).singleNodeValue as HTMLElement;
+        if (chatContainer) {
+            chatContainer.scrollTop == 100;
+        } else {
+            console.log('Chat container not found');
+        }
+    }, locators.chatRoomScrollUpXpath);
+
+    const chatRoomScrollUp = this.page.locator(locators.chatRoomScrollUp);
+
+    // Wait for the locator to be visible
+    await expect(chatRoomScrollUp).toContain(str);
+}
+
+// asser sent message is not visible visisble in chat
+export async function assert_Delete_Message(page: Page, str: string) {
+    await page.waitForTimeout(1000);
+    // Execute script to scroll to the top of the chat container
+    await this.page.evaluate((xpath) => {
+        const chatContainer = document.evaluate(
+            xpath,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null,
+        ).singleNodeValue as HTMLElement;
+        if (chatContainer) {
+            chatContainer.scrollTop == 100;
+        } else {
+            console.log('Chat container not found');
+        }
+    }, locators.chatRoomScrollUpXpath);
+
+    const chatRoomScrollUp = this.page.locator(locators.chatRoomScrollUp);
+
+    // Wait for the locator to not be visible
+    await expect(chatRoomScrollUp).not.toContain(str);
+}
+
+// asser sent message is visisble in chat
+export async function assert_ENS_Name(page: Page) {
+    await page.waitForTimeout(1000);
+    // Execute script to scroll to the top of the chat container
+    await this.page.evaluate((xpath) => {
+        const chatContainer = document.evaluate(
+            xpath,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null,
+        ).singleNodeValue as HTMLElement;
+        if (chatContainer) {
+            chatContainer.scrollTop == 100;
+        } else {
+            console.log('Chat container not found');
+        }
+    }, locators.chatRoomScrollUpXpath);
+
+    const chatRoomScrollUp = this.page.locator(locators.chatRoomScrollUp);
+
+    // Regex to match the ENS format (e.g., "0x849C...0B16")
+    const ensRegex = /0x[0-9a-fA-F]{4}\.\.\.[0-9a-fA-F]{4}/;
+
+    // Wait for the element containing the ENS name to be visible
+    const ensElement = await page.locator(
+        'xpath=//*[@id="chatmessage"]/div[51]/div/div[1]/div[2]/div/div[2]/div[1]/span',
+    );
+
+    // Wait until it appears
+    await ensElement.waitFor({ state: 'visible' });
+
+    // Extract the text from the ENS element
+    const ensText = await ensElement.innerText();
+
+    // Assert that the text matches the ENS pattern
+    expect(ensText).toMatch(ensRegex);
+
+    console.log('ENS name found and matches the pattern.');
+}
+
+// asser sent message is visisble in chat
+export async function assert_Sent_Hyperlink(page: Page) {
+    await page.waitForTimeout(1000);
+    // Execute script to scroll to the top of the chat container
+    await this.page.evaluate((xpath) => {
+        const chatContainer = document.evaluate(
+            xpath,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null,
+        ).singleNodeValue as HTMLElement;
+        if (chatContainer) {
+            chatContainer.scrollTop == 100;
+        } else {
+            console.log('Chat container not found');
+        }
+    }, locators.chatRoomScrollUpXpath);
+
+    const chatRoomScrollUp = this.page.locator(locators.chatRoomScrollUp);
+
+    // Wait for the locator to be visible
+    await expect(chatRoomScrollUp).toContain("'x.com/home");
+    await expect(chatRoomScrollUp).toContain(
+        '//span[contains(@class, "_link_token_")]',
+    );
+}
+
+// Assert that the last sent message has a reaction with the expected emoji
+export async function assert_Last_Message_Emoji_Reaction(page: Page) {
+    await page.waitForTimeout(1000);
+
+    // Get the last message block
+    const lastMessageBlock = await page
+        .locator('div._message_block_wrapper')
+        .last();
+
+    // Scroll into view if necessary
+    await lastMessageBlock.scrollIntoViewIfNeeded();
+
+    // Wait for the message block to be visible
+    await expect(lastMessageBlock).toBeVisible();
+
+    // Locate the reaction section within the last message block
+    const emojiReaction = await lastMessageBlock
+        .locator('div._reactions_wrapper')
+        .last();
+
+    // Wait for the reaction to appear
+    await expect(emojiReaction).toBeVisible();
+
+    // Assert that the reaction contains the expected emoji
+    await expect(emojiReaction).toContainText('😀');
+}
+
+// Assert that the last sent message has a reaction with the expected emoji
+export async function assert_Last_Message_Unselect_Reaction(page: Page) {
+    await page.waitForTimeout(1000);
+
+    // Get the last message block
+    const lastMessageBlock = await page
+        .locator('div._message_block_wrapper')
+        .last();
+
+    // Scroll into view if necessary
+    await lastMessageBlock.scrollIntoViewIfNeeded();
+
+    // Wait for the message block to be visible
+    await expect(lastMessageBlock).toBeVisible();
+
+    // Locate the reaction section within the last message block
+    const emojiReaction = await lastMessageBlock
+        .locator('div._reactions_wrapper')
+        .last();
+
+    // Wait for the reaction to appear
+    await expect(emojiReaction).toBeVisible();
+
+    // Assert that the reaction contains the expected emoji
+    await expect(emojiReaction).toContainText('');
+}
+
+// assert emoji panel is visible
+export async function assert_Emoji_Panel(page: Page) {
+    const element = await page.locator(locators.chatEmojiPanelClose);
+    await expect(element).toBeVisible();
+}
+
+// assert emoji panel is not visible
+export async function assert_Emoji_Panel_Closed(page: Page) {
+    const element = await page.locator(locators.chatEmojiPanelClose);
+    await expect(element).toBeDisabled();
+}
+
+// assert progressbar 100
+export async function assert_Progressbar_100_Character(page: Page) {
+    const element = await page.locator(locators.chatProgressBar);
+    await expect(element).toHaveText('40');
+}
+
+// assert progressbar 140
+export async function assert_Progressbar_140_Character(page: Page) {
+    const element = await page.locator(locators.chatProgressBar);
+    await expect(element).toHaveText('0');
+}
+
+// assert progressbar 140+
+export async function assert_Progressbar_141_Character(page: Page) {
+    const element = await page.locator(locators.chatProgressBar);
+    await expect(element).toHaveText('-1');
+}
+
+// assert progressbar Popup for exceeding lenghth
+export async function assert_Popup_Exceeding_Lenght(page: Page) {
+    const element = await page.locator(locators.chatPopupLenght);
+    await expect(element).toHaveText(
+        'Maximum length exceeded (140 characters limit).',
+    );
+}
+
+// assert non whitelisted link warning message
+export async function assert_Non_Whitelisted_Link(page: Page) {
+    const element = await page.locator(locators.chatNonWhitelistedLink);
+    await expect(element).toHaveText('You cannot send this link.');
+}
+
 // ---------------------------------------fill-----------------------------------
 
 // fill in address on transfer tab
@@ -559,6 +826,12 @@ export async function fillPoolBar(page: Page, num: number) {
     return page;
 }
 
+// fill chat input box
+export async function fill_Input_Box(page: Page, str: string) {
+    await page.locator(locators.chatBox).fill(str);
+    return page;
+}
+
 // ---------------------------------------confirm-----------------------------------
 
 // confirm transaction on metamask
@@ -590,4 +863,24 @@ export async function getValLimitPrice(page: Page) {
     // Get text of limit value
     const text = await locator.innerText();
     return text;
+}
+
+export async function scroll_Up_Chat_Room(page: Page) {
+    const selectors = [locators.chatRoomScrollUp, locators.chatMessageBody];
+
+    // Wait for any of the selectors to be visible
+    const visibleSelector = await this.waitForAnySelectorVisible(selectors);
+    // Execute script to scroll to the top of the chat container
+    if (visibleSelector) {
+        await this.page.evaluate((selector) => {
+            const chatContainer = document.querySelector(
+                selector,
+            ) as HTMLElement;
+            if (chatContainer) {
+                chatContainer.scrollTop = 0;
+            } else {
+                console.log('Chat container not found');
+            }
+        }, visibleSelector);
+    }
 }

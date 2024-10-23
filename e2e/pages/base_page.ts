@@ -32,4 +32,28 @@ export class BasePage {
             .getByRole('link', { name: 'Swap' })
             .click();
     }
+
+    // id needed
+    public async click_trade_page() {
+        await this.page
+            .getByTestId('page-header')
+            .getByRole('link', { name: 'Trade' })
+            .click();
+    }
+
+    // id needed
+    public async click_pool_page() {
+        await this.page
+            .getByTestId('page-header')
+            .getByRole('link', { name: 'Pool' })
+            .click();
+    }
+
+    // id needed
+    public async click_explore_page() {
+        await this.page
+            .getByTestId('page-header')
+            .getByRole('link', { name: 'Explore' })
+            .click();
+    }
 }

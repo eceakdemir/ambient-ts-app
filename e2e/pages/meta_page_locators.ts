@@ -74,8 +74,18 @@ export const locators = {
     getIdLiquidity: '//*[@id="current_row_scroll"]/div[1]/div[1]/div[1]',
     getValLimitPrice:
         'xpath=//*[@id="current_row_scroll"]/div[1]/div[2]/p/span[2]',
-    chatRoomDropdown: '[id=\'room dropdown\']',
+    chatOpenRoomDropdown: '[id=\'chat-open-close-room-dropdown-button\']',
     getWalletConnectivity:
         'xpath=//*[@id="root"]/div[1]/header/div[2]/div/div/div[2]/section[1]',
-    chatOpenTrollbox: '[id=\'open-close-trollbox\']',
+    chatOpenTrollbox: '[id=\'chat-open-close-trollbox\']',
+    chatBox: '[id=\'box\']',
+    chatSentMessage: '[id=\'send message button\']',
+    chatRoomScrollUpXpath: '//*[contains(@class, "_scrollable_div")]',
+    chatRoomScrollUp: '[class*="_scrollable_div"]',
+    chatEmojiPanelClose: '[id=\'chat-close-emoji-panel-button\']',
+    chatEmojipanel: '[id=\'chat-emoji-button\']',
+    chatProgressBar: '[id=\'chat-progress-bar\']',
+    chatPopupLenght: '[id=\'box\']',
+    chatMessageBody: '[class*="chatmessage"]',
+    chatNonWhitelistedLink: '[id=\'chat-popup-text\']',
 };

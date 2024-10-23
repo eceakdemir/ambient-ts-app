@@ -33,6 +33,7 @@ export async function fill(selector: string, page: Page, value: string) {
         await el.fill(value);
     }
 }
+
 export async function clickmmask(selector: string, page: Page) {
     return click('[data-testid="' + selector + '"]', page);
 }
@@ -44,6 +45,7 @@ export async function checkAndClickMMask(selector: string, page: Page) {
 export async function fillmmask(selector: string, page: Page, value: string) {
     return fill('[data-testid="' + selector + '"]', page, value);
 }
+
 export async function waiter(delay: number) {
     return new Promise((resolve, reject) => {
         setTimeout(
@@ -54,7 +56,9 @@ export async function waiter(delay: number) {
         );
     });
 }
-
+// for 2 context used
+// export async function prepareBrowser(userDataDirSuffix: string) {
+// const userDataDir = path.join(__dirname, `UserData_${userDataDirSuffix}`);
 export async function prepareBrowser() {
     const userDataDir = path.join(__dirname, 'UserData');
     const pathToExtension = path.join(__dirname, 'metamask');
@@ -75,21 +79,28 @@ export async function prepareBrowser() {
 }
 
 export async function initWallet(context: BrowserContext) {
+<<<<<<< HEAD
     await waiter(2);
 
     console.log('.............................');
     console.log('Environment variables loaded');
     console.log('.............................');
+=======
+    await waiter(5);
+>>>>>>> chat-started-with-old-code-base
 
     const seedEnv = process.env.TEST_METAMASK_SEED
         ? process.env.TEST_METAMASK_SEED
         : '';
     const seed = seedEnv.split(',');
 
+<<<<<<< HEAD
     console.log('Seed phrase loaded');
     console.log(seedEnv);
     console.log('...............................................');
 
+=======
+>>>>>>> chat-started-with-old-code-base
     async function processWallet(page) {
         const elementHandle = await page.$('#onboarding__terms-checkbox');
         if (elementHandle) {
@@ -152,6 +163,7 @@ export async function initWallet(context: BrowserContext) {
 
         // select sepolia network
         setTimeout(async () => {
+<<<<<<< HEAD
             // const spanElement = await page
             //     .locator(
             //         '.multichain-network-list-menu-content-wrapper span:text("Goerli")',
@@ -162,8 +174,18 @@ export async function initWallet(context: BrowserContext) {
             // }
 
             await clickmmask('Sepolia', page);
+=======
+            const spanElement = await page
+                .locator(
+                    '.multichain-network-list-menu-content-wrapper span:text("Sepolia")',
+                )
+                .first();
+            if (spanElement) {
+                spanElement.click();
+            }
+>>>>>>> chat-started-with-old-code-base
             setTimeout(async () => {
-                page.close();
+                // page.close();
             }, 300);
         }, 1000);
     }
