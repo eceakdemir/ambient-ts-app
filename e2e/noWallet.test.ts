@@ -2,6 +2,7 @@
 import { test, expect } from 'playwright/test';
 import HomePage from './pages/home_page';
 import TradePage from './pages/trade_page';
+import { timeout } from 'd3';
 
 test('test_CS_187_Toppool', async ({ page }) => {
     const test_page = new HomePage(page);
@@ -46,7 +47,9 @@ test('test_CS_1291_Toppools', async ({ page }) => {
     await test_page.home_btn();
     // Click on trade button on homepage
     await test_page.click_trade_btn();
+    // open top pools
     await test_page.click_toppools();
+    // select top pool
     await test_page.click_toppools_token();
     // compare if the trade paris are the same on the toppools and the trade page
     await test_page.assert_token();
@@ -471,62 +474,200 @@ test('test_CS_1305_ESC', async ({ page }) => {
     await test_page.page.waitForTimeout(10000);
     await test_page.assert_Popup();
 });
-
+// --------------------------------------CHAT-------------------------------------------------
 test('test_CS_353_Chat_Unlogged', async ({ page }) => {
     const test_page = new TradePage(page);
-    await test_page.goto();
-    await test_page.home_btn();
-    // Click on trade button on homepage
-    await test_page.click_trade_btn();
+    await test_page.gotoChat();
+    // open chat
     await test_page.click_Open_Chat();
     await test_page.assert_Chat_Unable();
 });
-// not clicking on chat room maybe need for id
-test('test_CS_351_Message_Display', async ({ page }) => {
+
+test('test_CS_351_Chat_Message_Display', async ({ page }) => {
     const test_page = new TradePage(page);
-    await test_page.goto();
-    await test_page.home_btn();
-    // Click on trade button on homepage
-    await test_page.click_trade_btn();
+    await test_page.gotoChat();
+    // open chat panel
     await test_page.click_Open_Chat();
-    await test_page.click_Chat_Room_Dropdown();
-    await test_page.click_Select_Chat_Room();
+    await test_page.click_Open_Room_Dropdown();
+    await test_page.click_Select_Pool();
     await test_page.assert_Chat_Room();
 });
 
-test('test_CS_1659_Scroll_to_Bottom', async ({ page }) => {
+test('test_CS_1659_Chat_Scroll_to_Bottom', async ({ page }) => {
+    const test_page = new TradePage(page);
+    await test_page.gotoChat();
+    // open chat
+    await test_page.click_Open_Chat();
+    // Scroll to the bottom of the chat panel
+    await test_page.scroll_Up_Chat_Room();
+    // click the last button to scroll back to the bottom
+    await test_page.click_Last_Button();
+    // Assert that the last message is in the viewport
+    await test_page.assert_Last_Message();
+});
+
+test('test_CS_360_Chat_Pages', async ({ page }) => {
     const test_page = new TradePage(page);
     await test_page.gotoChat();
     await test_page.click_Open_Chat();
-    // Wait for the chat container to be visible
-    await page.waitForSelector('#chatmessage');
+    // open swap page
+    await test_page.click_swap_page();
+    await test_page.assert_Chat_Active();
+    // open trade page
+    await test_page.click_trade_page();
+    await test_page.assert_Chat_Active();
+    // open pool page
+    await test_page.click_pool_page();
+    await test_page.assert_Chat_Active();
+    // open explore page
+    await test_page.click_explore_page();
+    await test_page.assert_Chat_Active();
+});
 
-    // Scroll to the top of the chat message element
-    await page.evaluate(() => {
-        const chatElement = document.getElementById('chatmessage'); // Ensure the correct ID is used
-        if (chatElement) {
-            chatElement.scrollTop = 0; // Scroll to the top
-        } else {
-            console.error('Chat message element not found!');
-        }
-    });
-    // click the last button to scroll back to the bottom
-    await test_page.click_Last_Button();
+test('test_CS_2351_Chat_Previous_Message', async ({ page }) => {
+    const test_page = new TradePage(page);
+    await test_page.gotoChat();
+    // open chat
+    await test_page.click_Open_Chat();
+    // Scroll to the top of the chat panel
+    await test_page.page.waitForTimeout(1000);
+    await test_page.scroll_Up_Chat_Room();
+    // click previous button
+    await test_page.click_Previous_Button();
+    // Assert
+    await test_page.assert_Previous_Message();
+});
 
+test('test_CS_1740_Chat_Ctrl_M', async ({ page }) => {
+    const test_page = new TradePage(page);
+    await test_page.gotoChat();
+    // open chat
+    await test_page.click_Open_Chat();
+    // Press CTRL+M
+    await page.keyboard.down('Control');
+    await page.keyboard.press('KeyM');
+    await page.keyboard.up('Control');
+    // Assert
+    await test_page.assert_Infobox();
+});
+
+test('test_CS_1737_Chat_Esc', async ({ page }) => {
+    const test_page = new TradePage(page);
+    await test_page.gotoChat();
+    // open chat
+    await test_page.click_Open_Chat();
+    // Press esc
+    await page.keyboard.press('Escape');
+    // Assert
+    await test_page.assert_Chat_Deactive();
+});
+
+test('test_CS_1736_Chat_Ctrl_Alt_C', async ({ page }) => {
+    const test_page = new TradePage(page);
+    await test_page.gotoChat();
+    // Press Ctrl + Alt + C
+    await page.keyboard.down('Control');
+    await page.keyboard.down('Alt');
+    await page.keyboard.press('KeyC');
+    await page.keyboard.up('Alt');
+    await page.keyboard.up('Control');
+    // Assert
+    await test_page.assert_Chat_Active();
+});
+
+test('test_CS_998_Chat_Change_Pool', async ({ page }) => {
+    const test_page = new TradePage(page);
+    await test_page.gotoChat();
+    // open chat
+    await test_page.click_Open_Chat();
+    // open room dropdown
+    await test_page.click_Open_Room_Dropdown();
+    // select a pool
+    await test_page.click_Select_Pool();
+    // Assert
+    await test_page.assert_Pool_Name();
+});
+
+test('test_CS_2010_Chat_Scroll_Position', async ({ page }) => {
+    const test_page = new TradePage(page);
+    await test_page.gotoChat();
+    // open chat
+    await test_page.click_Open_Chat();
+    // Scroll to the top of the chat panel
+    await test_page.page.waitForTimeout(10000);
+    await test_page.scroll_Chat_Room();
+    // Assert
+    await test_page.assert_Previous_Message();
+});
+
+test('test_CS_354_Chat_Favorite_Pools', async ({ page }) => {
+    const test_page = new TradePage(page);
+    // open chat link on the trade page
+    await test_page.gotoChat();
+    // open dropdown
+    await test_page.click_toppools();
+    // add a fav pool
+    await test_page.click_add_fav();
+    // open chat
+    await test_page.click_Open_Chat();
+    // open room dropdown
+    await test_page.click_Open_Room_Dropdown();
+    // Assert
+    await test_page.assert_Pool_Name_Favorite();
+});
+
+test('test_CS_2716_Chat_Current_Pools', async ({ page }) => {
+    const test_page = new TradePage(page);
+    // open chat link on the trade page
+    await test_page.gotoChat();
+    // open chat
+    await test_page.click_Open_Chat();
+    // click on current pool
+    await test_page.click_current_pools();
+    // Assert
+    await test_page.assert_Pool_Name_Current();
+});
+
+test('test_CS_2399_Chat_Dynamic_Room_Emoji', async ({ page }) => {
+    const test_page = new TradePage(page);
+    // open chat link on the trade page
+    await test_page.gotoChat();
+    // open chat
+    await test_page.click_Open_Chat();
+    // open room dropdown
+    await test_page.click_Open_Room_Dropdown();
+    // Assert
+    await test_page.assert_Pool_Name_Global();
+    // await test_page.assert_Pool_Name_Admin();
+});
+
+test('test_CS_1651_Chat_Account_Visit', async ({ page }) => {
+    const test_page = new TradePage(page);
+    // open chat link on the trade page
+    await test_page.gotoChat();
+    // open chat
+    await test_page.click_Open_Chat();
+    // click on ens name in chat
+    const valueChat = test_page.get_ENS_Chat();
+    // Click on ENS name in chat to visit the account
+    await test_page.click_ENS_Name();
+    // Assert that the ENS name in chat matches the ENS name in the account
+    await test_page.assert_ENS_Name(await valueChat);
+});
+// new tc
+test('test_CS_371_Chat_Last_Message', async ({ page }) => {
+    const test_page = new TradePage(page);
+    await test_page.gotoChat();
+    // open chat
+    await test_page.click_Open_Chat();
     // Assert that the last message is in the viewport
-    const isLastMessageInView = await page.evaluate(() => {
-        const lastMessage = document.getElementById('thelastmessage');
-        if (!lastMessage) return false;
-        const rect = lastMessage.getBoundingClientRect();
-        return (
-            rect.top >= 0 &&
-            rect.left >= 0 &&
-            rect.bottom <=
-                (window.innerHeight || document.documentElement.clientHeight) &&
-            rect.right <=
-                (window.innerWidth || document.documentElement.clientWidth)
-        );
-    });
-
-    expect(isLastMessageInView).toBe(true);
+    await test_page.assert_Last_Message();
+    // open room dropdown
+    await test_page.click_Open_Room_Dropdown();
+    // select a pool
+    await test_page.click_Select_Pool();
+    // Assert
+    await test_page.assert_Pool_Name();
+    // Assert that the last message is in the viewport
+    await test_page.assert_Last_Message();
 });

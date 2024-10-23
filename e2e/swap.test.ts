@@ -76,6 +76,26 @@ import {
     click_Chat_Room_Dropdown,
     click_Select_Chat_Room,
     gotoChat,
+    fill_Input_Box,
+    click_Chat_Sent_Message,
+    assert_Sent_Message,
+    assert_Emoji_Panel,
+    assert_Emoji_Panel_Closed,
+    click_Chat_Emoji_Panel,
+    click_Chat_Emoji_Panel_Close,
+    assert_Progressbar_100_Character,
+    assert_Progressbar_140_Character,
+    assert_Progressbar_141_Character,
+    assert_Popup_Exceeding_Lenght,
+    scroll_Up_Chat_Room,
+    assert_Sent_Hyperlink,
+    assert_Non_Whitelisted_Link,
+    click_Chat_Emoj,
+    assert_ENS_Name,
+    click_Chat_Emoji_Reaction,
+    assert_Last_Message_Emoji_Reaction,
+    assert_Delete_Message,
+    assert_Last_Message_Unselect_Reaction,
 } from './pages/meta_page';
 
 import {
@@ -134,7 +154,7 @@ async function testMeta(browser: BrowserContext) {
 }
 test.setTimeout(90000);
 
-test('test_CS_1132_Swap_Wallet', async () => {
+test('test_Swap_Wallet', async () => {
     await initWallet(browser);
 });
 
@@ -698,34 +718,390 @@ test('test_CS_199_Trade_Wallet', async () => {
     await assertWalletonnectivity(page);
 });
 
-test('test_CS_1659_Scroll_to_Bottom', async () => {
+// --------------------------------------CHAT-------------------------------------------------
+
+// new test in progresss wallet not connecting extension not visisble in browser
+test('test_CS_349_Message_Sending', async () => {
     const context: BrowserContext = browser;
     // connect to metamask
     await initWallet(browser);
     // open ambient finance page
     const page: Page = await context.newPage();
-    test.setTimeout(9000000);
     await gotoChat(page);
     await page.bringToFront();
-    // open chat panel
+    // open chat
     await click_Open_Chat(page);
-
-    await page.evaluate(() => {
-        window.scrollTo(0, document.body.scrollHeight);
-    });
-
-    // Add a delay to ensure the page has time to load additional content if needed
-    await page.waitForTimeout(2000);
-
-    // Scroll back up to the top of the page
-    await page.evaluate(() => {
-        window.scrollTo(0, 0);
-    });
-
-    // Add a delay to ensure the page has time to settle after scrolling
-    await page.waitForTimeout(2000);
+    // write message into input box
+    await fill_Input_Box(page, 'Hello Test');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Sent_Message(page, 'Hello Test');
 });
 
+test('test_CS_349_Message_Sending_Enter', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(page, 'Hello Test');
+    // click sent message button
+    await page.keyboard.down('Enter');
+    // assert message sent to chat
+    await assert_Sent_Message(page, 'Hello Test');
+});
+
+// new test in progresss check for assertion
+test('test_CS_1738_Altx_Shortcut', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // Press CTRL+M
+    await page.keyboard.down('Alt');
+    await page.keyboard.press('KeyX');
+    // Assert
+    await assert_Emoji_Panel(page);
+});
+
+// new test in progresss check for assertion
+test('test_CS_1739_Altq_Shortcut', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // open emoji panel
+    await click_Chat_Emoji_Panel(page);
+    // Press CTRL+M
+    await page.keyboard.down('Alt');
+    await page.keyboard.press('KeyQ');
+    // Assert that emoji panel is closed
+    await assert_Emoji_Panel_Closed(page);
+});
+
+// new test in progresss check for assertion
+test('test_CS_687_Close_Emoji_Panel', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // open emoji panel
+    await click_Chat_Emoji_Panel(page);
+    // open emoji panel
+    await click_Chat_Emoji_Panel_Close(page);
+    // Assert that emoji panel is closed
+    await assert_Emoji_Panel_Closed(page);
+});
+
+// new test in progresss check for assertion
+test('test_CS_1653_Progressbar_100', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(
+        page,
+        '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111',
+    );
+    // assert message sent to chat
+    await assert_Progressbar_100_Character(page);
+});
+
+// new test in progresss check for assertion
+test('test_CS_1655_Progressbar_140', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(
+        page,
+        '11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111',
+    );
+    // assert message sent to chat
+    await assert_Progressbar_140_Character(page);
+});
+
+// new test in progresss check for assertion
+test('test_CS_1657_Progressbar_140+', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(
+        page,
+        '111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111',
+    );
+    // assert 141 character message
+    await assert_Progressbar_141_Character(page);
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message is unable to be sent
+    await assert_Popup_Exceeding_Lenght(page);
+});
+
+// new test in progresss check for assertion
+test('test_CS_846_New_Message_Scrollbar', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // scroll up in chat panel
+    await scroll_Up_Chat_Room(page);
+    // write message into input box
+    await fill_Input_Box(page, 'test message');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Sent_Message(page, 'test message');
+});
+
+// new test in progresss check for assertion
+test('test_CS_1984_Hyperlink', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(page, 'x.com/home');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Sent_Hyperlink(page);
+});
+
+// new test in progresss check for assertion
+test('test_CS_1979_Link_Domain_Name_Visible', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(page, 'https://ambient.finance/trade/market ');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Sent_Message(page, 'ambient.finance/trade/market');
+});
+
+// new test in progresss check for assertion
+test('test_CS_1980_Whitelisted_Link_No_Https', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(page, 'ambient.finance ');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Sent_Message(page, 'ambient.finance');
+    await fill_Input_Box(page, 'twitter.com');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Sent_Message(page, 'twitter.com');
+    await fill_Input_Box(page, 'x.com ');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Sent_Message(page, 'x.com');
+});
+
+// new test in progresss check for assertion
+test('test_CS_1980_Non_Whitelisted_Link_No_Https', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(page, 'facebook.com');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Non_Whitelisted_Link(page);
+});
+
+// new test in progresss check for assertion
+test('test_CS_362_Emoji_Sent', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // open emoji panel
+    await click_Chat_Emoji_Panel(page);
+    // select emoji to write in the input box
+    await click_Chat_Emoj(page);
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Sent_Message(page, '😍');
+});
+
+// new test in progresss check for assertion
+test('test_CS_853_ENS_Name', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(page, 'Test');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_ENS_Name(page);
+});
+
+// new test in progresss check for assertion
+// !!!! buna bakk!!!!! reaction function not done
+test('test_CS_1760_Reaction_Emoji', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(page, 'Test');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Sent_Message(page, 'Test');
+    // react to message
+
+    // assert reaction
+    await assert_Last_Message_Emoji_Reaction(page);
+});
+
+// new test in progresss check for assertion
+// click delete message button
+test('test_CS_875_Delete_Message', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(page, 'Delete123');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Sent_Message(page, 'Delete123');
+    // delete sent message
+
+    // assert reaction
+    await assert_Delete_Message(page, 'Delete123');
+});
+
+// new test in progresss check for assertion
+// !!!! buna bakk!!!!! reaction function not done
+test('test_CS_1761_Unselect_Reaction', async () => {
+    const context: BrowserContext = browser;
+    // connect to metamask
+    await initWallet(browser);
+    // open ambient finance page
+    const page: Page = await context.newPage();
+    await gotoChat(page);
+    await page.bringToFront();
+    // open chat
+    await click_Open_Chat(page);
+    // write message into input box
+    await fill_Input_Box(page, 'Test');
+    // click sent message button
+    await click_Chat_Sent_Message(page);
+    // assert message sent to chat
+    await assert_Sent_Message(page, 'Test');
+    // react to message
+
+    // assert reaction
+    await assert_Last_Message_Emoji_Reaction(page);
+    // unselect reaction
+
+    // assert reaction
+    await assert_Last_Message_Unselect_Reaction(page);
+});
+
+/*
 test('test_deneme', async () => {
     const context: BrowserContext = browser;
     // connect to metamask
@@ -766,3 +1142,4 @@ test('test_deneme2', async () => {
     await context1.close();
     await context2.close();
 });
+*/
