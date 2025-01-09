@@ -56,7 +56,9 @@ export async function waiter(delay: number) {
 }
 
 export async function prepareBrowser() {
+    console.log('prepare browser')
     const userDataDir = path.join(__dirname, 'UserData');
+    console.log(userDataDir)
     const pathToExtension = path.join(__dirname, 'metamask');
 
     if (!fs.existsSync(pathToExtension)) {
@@ -182,7 +184,7 @@ export async function initWallet(context: BrowserContext) {
     if(!extensionPage){
         console.log('extension page not found, redirecting...')
         const page = await context.newPage();
-        await page.goto('chrome-extension://flndlnecmoofflbammaghnboonfhgaaf/home.html#');
+        await page.goto('chrome-extension://eifceoegkepckpcbgnlhobhjhecalkkp/home.html#');
         extensionPage = page;
     }
     await waiter(2);
@@ -214,7 +216,9 @@ export async function checkForWalletConnection(
         button.click();
         await waiter(2);
         // Aggree button
-        // await checkAndClick('#agree_button_ToS', page);
+         await checkAndClick('#agree_button_ToS', page);
+
+                await waiter(1);
         await clickmmask('wallet-selector-eip6963', page);
 
         // // Metamask button

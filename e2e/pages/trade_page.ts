@@ -28,6 +28,10 @@ export default class TradePage extends BasePage {
         await this.page.locator(locators.assertToken).click();
     }
 
+    public async click_current_pools() {
+        await this.page.locator(locators.currentPoolButton).click();
+    }
+
     public async click_recent_pools() {
         await this.page.locator(locators.assertToken).click();
         await this.page.locator(locators.clickRecentPairs).click();
@@ -56,7 +60,7 @@ export default class TradePage extends BasePage {
     public async click_add_fav() {
         await this.page
             .locator('div')
-            .filter({ hasText: /^ETH \/ USDC3/ })
+            .filter({ hasText: /^USDT \/ USDC3/ })
             .getByLabel('Add pool from favorites')
             .click();
         //        const row = await this.page.locator(`text=${"ETH / USDC"}`).locator('xpath=ancestor::tr');
@@ -150,8 +154,36 @@ export default class TradePage extends BasePage {
         await this.page.locator(locators.chatOpenTrollbox).click();
     }
 
+    public async click_Open_Room_Dropdown() {
+        await this.page.locator(locators.chatOpenRoomDropdown).click();
+    }
+
+    public async click_Select_Pool() {
+        await this.page.locator(locators.chatSelectPool).click();
+    }
+
     public async click_Last_Button() {
         await this.page.locator(locators.chatLastButton).click();
+    }
+
+    public async click_Previous_Button() {
+        await this.page.locator(locators.chatPreviousButton).click();
+    }
+
+    public async click_ENS_Name() {
+        // click on ens name in chat panel
+        // Locate the container with a unique identifier
+        const container = await this.page.locator(
+            'div[class*="_message_item"]',
+        );
+        // Narrow down to the specific span inside this container
+        const element = await container
+            .locator('span[class*="_name_default_label"]')
+            .first();
+        // Click the element
+        await element.click();
+        // verify that the element you interacted with is correct
+        await expect(element).toHaveText(/0x[0-9a-fA-F]{4}\.\.\./);
     }
 
     public async click_Chat_Room_Dropdown() {
@@ -356,6 +388,25 @@ export default class TradePage extends BasePage {
         return priceNumber;
     }
 
+    async get_ENS_Chat(): Promise<string> {
+        const container = await this.page.locator(
+            'div[class*="_message_item"]',
+        );
+        const element = await container
+            .locator('span[class*="_name_default_label"]')
+            .first();
+
+        const ENSText = await element.textContent();
+
+        // Handle the case where ENSText might be null
+        if (ENSText === null) {
+            throw new Error('ENS text content is null');
+        }
+        // Remove the ellipsis '...' from the ENS name
+        const cleanedENSText = ENSText.replace('...', '');
+        return cleanedENSText;
+    }
+
     // -------------------------------------------------assert --------------------------------------------------------
     public async assert_token() {
         // compare the trade paris are the same on the homepage and the trade page
@@ -502,18 +553,156 @@ export default class TradePage extends BasePage {
     }
 
     public async assert_Chat_Room() {
-        const element = await this.page.$('div[style="flex-grow: 1;"]');
-
+        const element = await this.page.locator(
+            locators.chatOpenRoomDropdownName,
+        );
         if (!element) {
             throw new Error('Element with specified CSS selector not found.');
         }
 
         // Get the text content of the element
         const textContent = await element.textContent();
-
-        // Check if the text content contains "ETH / USDC"
-        expect(textContent).toContain('ETH / USDC');
+        // Check if the text content contains "ETH / WBTC"
+        expect(textContent).toContain('ETH / WBTC');
     }
+
+    public async assert_Chat_Active() {
+        const element = await this.page.locator(locators.chatOpenTrollbox);
+
+        if (!element) {
+            throw new Error('Element with specified CSS selector not found.');
+        }
+
+        // Check if the chat panel is open
+        expect(element).toBeEnabled;
+    }
+
+    public async assert_Chat_Deactive() {
+        const element = await this.page.locator(locators.chatOpenTrollbox);
+
+        if (!element) {
+            throw new Error('Element with specified CSS selector not found.');
+        }
+
+        // Check if the chat panel is closed
+        expect(element).toBeDisabled;
+    }
+
+    public async assert_Last_Message() {
+        await this.page.waitForTimeout(1000);
+        // Execute script to scroll to the top of the chat container
+        await this.page.evaluate((xpath) => {
+            const chatContainer = document.evaluate(
+                xpath,
+                document,
+                null,
+                XPathResult.FIRST_ORDERED_NODE_TYPE,
+                null,
+            ).singleNodeValue as HTMLElement;
+            if (chatContainer) {
+                chatContainer.scrollTop == 100;
+            } else {
+                console.log('Chat container not found');
+            }
+        }, locators.chatRoomScrollUpXpath);
+
+        const chatRoomScrollUp = this.page.locator(locators.chatRoomScrollUp);
+
+        // Wait for the locator to be visible
+        await expect(chatRoomScrollUp).toBeVisible();
+    }
+
+    public async assert_Previous_Message() {
+        await this.page.waitForTimeout(10000);
+        // Execute script to scroll to the top of the chat container
+        await this.page.evaluate((xpath) => {
+            const chatContainer = document.evaluate(
+                xpath,
+                document,
+                null,
+                XPathResult.FIRST_ORDERED_NODE_TYPE,
+                null,
+            ).singleNodeValue as HTMLElement;
+            if (chatContainer) {
+                chatContainer.scrollTop == 0;
+            } else {
+                console.log('Chat container not found');
+            }
+        }, locators.chatRoomScrollUpXpath);
+
+        const chatRoomScrollUp = this.page.locator(locators.chatRoomScrollUp);
+
+        // Wait for the locator to be visible
+        await expect(chatRoomScrollUp).toBeVisible();
+    }
+
+    public async assert_Infobox() {
+        const element = await this.page.locator(locators.chatInfoPanel);
+        await expect(element).toBeVisible();
+    }
+
+    public async assert_Pool_Name() {
+        const element = await this.page.locator(locators.chatPoolName);
+        const poolName = await element.textContent();
+        expect(poolName).toContain('ETH / WBTC');
+    }
+
+    public async assert_Pool_Name_Favorite() {
+        const element = await this.page.locator(locators.chatPoolFav);
+        const poolName = await element.textContent();
+        expect(poolName).toContain('USDC / USDT ❤️');
+    }
+
+    public async assert_Pool_Name_Current() {
+        const element1 = await this.page.locator(locators.getTokenName);
+        const element2 = await this.page.locator(
+            locators.chatOpenRoomDropdownName,
+        );
+
+        const text1 = await element1.textContent();
+        const text2 = await element2.textContent();
+
+        expect(text1).toEqual(text2);
+    }
+
+    public async assert_Pool_Name_Global() {
+        const element = await this.page.locator(
+            locators.chatOpenRoomDropdownName,
+        );
+        const poolName = await element.textContent();
+        expect(poolName).toContain('Global 🌍');
+    }
+
+    public async assert_Pool_Name_Admin() {
+        const element = await this.page.locator(locators.chatPoolAdmin);
+        const poolName = await element.textContent();
+        expect(poolName).toContain('Admins 👑');
+    }
+
+    public async assert_ENS_Name(ENS_Chat: string) {
+        // Get the current URL of the page
+        const currentUrl = this.page.url();
+
+        // Function to extract the ENS name from the URL
+        function getENSFromURL(url: string): string {
+            const parsedUrl = new URL(url);
+            const pathname = parsedUrl.pathname;
+            const ensName = pathname.split('/').pop();
+            if (!ensName) {
+                throw new Error('ENS name not found in URL');
+            }
+            return ensName;
+        }
+
+        // Extract ENS name from the current URL
+        const ensName = getENSFromURL(currentUrl);
+
+        // Log the ENS name to the console
+        console.log('ENS Name:', ensName);
+
+        expect(ensName).toContain(ENS_Chat);
+    }
+
     // -----------------------------------------------other fun--------------------------------------------------------
     public async denom() {
         await this.page.locator(locators.getTokenName).click();
@@ -523,5 +712,63 @@ export default class TradePage extends BasePage {
         await this.page.getByPlaceholder('Search...').click();
         await this.page.getByPlaceholder('Search...').fill(value);
         await this.page.getByPlaceholder('Search...').press('Enter');
+    }
+
+    public async scroll_Up_Chat_Room() {
+        const selectors = [locators.chatRoomScrollUp, locators.chatMessageBody];
+
+        // Wait for any of the selectors to be visible
+        const visibleSelector = await this.waitForAnySelectorVisible(selectors);
+        // Execute script to scroll to the top of the chat container
+        if (visibleSelector) {
+            await this.page.evaluate((selector) => {
+                const chatContainer = document.querySelector(
+                    selector,
+                ) as HTMLElement;
+                if (chatContainer) {
+                    chatContainer.scrollTop = 0;
+                } else {
+                    console.log('Chat container not found');
+                }
+            }, visibleSelector);
+        }
+    }
+
+    public async scroll_Chat_Room() {
+        const selectors = [locators.chatRoomScrollUp, locators.chatMessageBody];
+
+        // Wait for any of the selectors to be visible
+        const visibleSelector = await this.waitForAnySelectorVisible(selectors);
+        // Execute script to scroll to the top of the chat container
+        if (visibleSelector) {
+            await this.page.evaluate((selector) => {
+                const chatContainer = document.querySelector(
+                    selector,
+                ) as HTMLElement;
+                if (chatContainer) {
+                    chatContainer.scrollTop = 30;
+                } else {
+                    console.log('Chat container not found');
+                }
+            }, visibleSelector);
+        }
+    }
+
+    // Helper function to wait for any selector to be visible
+    private async waitForAnySelectorVisible(
+        selectors: string[],
+    ): Promise<string | null> {
+        for (const selector of selectors) {
+            try {
+                await this.page.waitForSelector(selector, {
+                    state: 'visible',
+                    timeout: 10000,
+                });
+                return selector;
+            } catch (e) {
+                // Continue to next selector
+            }
+        }
+        throw new Error('None of the expected elements became visible.');
     }
 }

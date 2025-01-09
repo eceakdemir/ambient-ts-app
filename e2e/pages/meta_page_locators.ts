@@ -2,10 +2,10 @@ export const locators = {
     gotoTradePage:
         'https://dev-ambi.netlify.app/trade/market/chain=0xaa36a7&tokenA=0x60bBA138A74C5e7326885De5090700626950d509&tokenB=0x0000000000000000000000000000000000000000',
     gotoSwap:
-        'http://localhost:3000/swap/chain=0xaa36a7&tokenA=0x0000000000000000000000000000000000000000&tokenB=0x60bBA138A74C5e7326885De5090700626950d509',
+        'https://dev-ambi.netlify.app/swap/chain=0xaa36a7&tokenA=0x60bBA138A74C5e7326885De5090700626950d509&tokenB=0x0000000000000000000000000000000000000000',
     gotoChat:
         'https://proven-chat-test.netlify.app/trade/market/chain=0x1&tokenA=0x0000000000000000000000000000000000000000&tokenB=0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
-    gotoHomepage: 'http://localhost:3000',
+    gotoHomepage: 'https://dev-ambi.netlify.app/',
     clickLiqPosition: '[id=\'sidebar_header_liquidity_positions\']',
     clickLimitOrder: '[id=\'sidebar_header_limit_orders\']',
     clickTransactions: '[id=\'sidebar_header_transactions\']',
@@ -31,6 +31,7 @@ export const locators = {
     clickSubmit: '[id=\'submit_range_position_button\']',
     clickRemoveLiq: '[id=\'harvest_remove_fees_modal_button\']',
     clickConfirm: '[id=\'set_skip_confirmation_button\']',
+    clickConfirmTrade: '[id=\'confirm_swap_button\']',
     clickRemoveLimits: 'Remove',
     clickRemoveLimitOrder: '[id=\'claim_remove_limit_button\']',
     clickRemoveLiquidity:
@@ -40,10 +41,11 @@ export const locators = {
     clickSubmitSlippage: '[id=\'update_settings_button\']',
     clickConfirmSwap: '[id=\'confirm_swap_button\']',
     clickConfirmLimit: '[id=\'confirm_limit_order_button\']',
-    clickTransactionsRow: '//*[@id="current_row_scroll"]/div[1]',
+    clickTransactionsRow: '[data-label="value"]',
     clickClaimLimit:
-        '[id=\'claim_limit_button_limit_608f80ba82d75d7e0188c677434bf872d805987d216301082bf09d06448e6908\']',
+        '[id=\'claim_limit_button_limit_\']',
     clickMyTransactions: '[id=\'positions_only_toggleswitch\']',
+    checkMyTransactions: 'data-ison',
     clickBalancedToggle: '[id=\'advanced_repositionswitch\']',
     clickDecreaseMinPrice: '[id=\'decrease_min_price_button\']',
     clickLimitRate: '[id=\'increase_limit_rate_button\']',
@@ -52,30 +54,41 @@ export const locators = {
     clickChangeWalletSelecet:
         'xpath=/html/body/div[3]/div[3]/div/section/div[2]/div[2]/div[1]',
     assertTransactionSwap:
-        'xpath=//*[@id="Modal_Global"]/div/div/section/div/footer/div/button/div[2]',
+        '[class^="MuiAlert-message css-"]',
     assertIdShareableChart:
-        '//*[@id="Modal_Global"]/div/div/section/div/div[2]/div/section[1]/div[3]/div[2]/div/p',
+        '//*[@id="Modal_Global"]/div/div/section/div/div[2]/div/section[1]/div[4]/div[2]',
     assertValLimitPriceShareableChart:
         'xpath=//*[@id="Modal_Global"]/div/div/section/div/div[2]/div/div[1]/div/div/div[6]/section[1]/h2',
-    assertTransactionsTransactionTab: 'xpath=//*[@id="tx_row_0"]/div[2]/div[2]',
+    assertTransactionsTransactionTab: '[data-label="wallet"][tabindex="0"][id="tx_row_0"]',
     assertChangeNetwork:
-        'xpath=//*[@id="root"]/div[1]/header/div[2]/div/div/div[1]/div/div/div/div/div',
+        '_iconContainer_1i49g_31',
     fillTransferTab:
         '[id=\'exchange-balance-transfer-address-exchange-balance-transfer-quantity\']',
     fillWithdrawTab:
         '[id=\'exchange-balance-withdraw-address-exchange-balance-transfer-quantity\']',
     fillTransferUSDC: '[id=\'exchangeBalance_qty\']',
+    fillSlippage: '[id=\'slippage_tolerance_input_field\']',
     fillPool: '[id=\'range_A_qty\']',
     fillLimit: '[id=\'limit_sell_qty\']',
     fillSwap: '[id=\'swap_sell_qty\']',
     fillPoolBar: '[id=\'input-slider-range\']',
     confirmMeta: 'page-container-footer-next',
     confirmNetworkChange: 'Switch network',
-    getIdLiquidity: '//*[@id="current_row_scroll"]/div[1]/div[1]/div[1]',
+    getIdLiquidity: '[class^="_value_content_"]',
     getValLimitPrice:
         'xpath=//*[@id="current_row_scroll"]/div[1]/div[2]/p/span[2]',
-    chatRoomDropdown: '[id=\'room dropdown\']',
+        chatOpenRoomDropdown: '[id=\'chat-open-close-room-dropdown-button\']',
     getWalletConnectivity:
         'xpath=//*[@id="root"]/div[1]/header/div[2]/div/div/div[2]/section[1]',
-    chatOpenTrollbox: '[id=\'open-close-trollbox\']',
+    chatOpenTrollbox: '[id=\'chat-open-close-trollbox\']',
+    chatBox: '[id=\'box\']',
+    chatSentMessage: '[id=\'send message button\']',
+    chatRoomScrollUpXpath: '//*[contains(@class, "_scrollable_div")]',
+    chatRoomScrollUp: '[class*="_scrollable_div"]',
+    chatEmojiPanelClose: '[id=\'chat-close-emoji-panel-button\']',
+    chatEmojipanel: '[id=\'chat-emoji-button\']',
+    chatProgressBar: '[id=\'chat-progress-bar\']',
+    chatPopupLenght: '[id=\'chat-popup\']',
+    chatMessageBody: '[class*="chatmessage"]',
+    chatNonWhitelistedLink: '[id=\'chat-popup-text\']',
 };

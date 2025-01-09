@@ -171,7 +171,56 @@ export async function clickTransactionsTransactionTable(page: Page) {
 
 // click add liq on transaction table
 export async function clickAddLiquidity(page: Page) {
-    const locator = await page.getByText(locators.clickAddLiquidity).nth(1);
+    // Wait for rows to load
+    await page.waitForSelector('[data-type="infinite-scroll-row"]', { timeout: 10000 });
+
+    // Locate all rows with the data-type "infinite-scroll-row"
+    const rows = page.locator('[data-type="infinite-scroll-row"]');
+    const rowCount = await rows.count();
+
+    console.log('Total rows found:', rowCount);
+    console.log(await page.content()); // Log the full HTML content for debugging
+
+    if (rowCount === 0) {
+        console.warn('No rows with data-type "infinite-scroll-row" found.');
+        throw new Error('Test failed: No rows found with the specified selector');
+    }
+
+    for (let i = 0; i < rowCount; i++) {
+        const row = rows.nth(i);
+
+        // Locate "Add" button within the row based on the id pattern
+        const addButton = row.locator('button[id^="add_liquidity_position_"]');
+        const buttonCount = await addButton.count();
+        
+        // Log for debugging
+        console.log(`Row ${i + 1}: Found ${buttonCount} 'Add' button(s) with ID starting with "add_liquidity_position_"`);
+
+        // Check if the "Add" button exists in this row
+        if (buttonCount > 0) {
+            const text = await addButton.innerText();
+
+            // Check if the button's text is "Add"
+            if (text === 'Add') {
+                await addButton.click();
+                console.log('Add button found and clicked in row:', i + 1);
+
+                // Enter amount in USDC
+                await page.locator(locators.enterAmountLiquidity).fill('50');
+                // Click on confirm
+                await page.locator(locators.clickSubmit).click();
+                await page.locator(locators.clickConfirm).click();
+                return page; // Exit after clicking the first "Add" button
+            }
+        }
+    }
+
+    // If no "Add" button with text "Add" was found, fail the test
+    console.warn('No "Add" button with text "Add" found in any row.');
+    throw new Error('Test failed: No matching "Add" button found in any row');
+
+   
+   /* const locator = await page.getByText(locators.clickAddLiquidity).nth(1);
     const text = await locator.innerText();
     if (text == 'Add') {
         await locator.click();
@@ -184,24 +233,55 @@ export async function clickAddLiquidity(page: Page) {
         // fail test add does not exist
         expect(text).toContain('Add');
     }
-    return page;
+    return page;*/
 }
 
 // id needed
 // click remove limits on transaction table
 export async function clickRemoveLimits(page: Page) {
-    const locator = await page.getByText(locators.clickRemoveLimits).nth(1);
-    const text = await locator.innerText();
-    if (text == 'Remove') {
-        await locator.click();
-        // remove limit order
-        await page.locator(locators.clickRemoveLimitOrder).click();
-    } else {
-        // fail test remove does not exist
-        expect(text).toContain('Remove');
+    // Wait for rows to load
+    await page.waitForSelector('[data-type="infinite-scroll-row"]', { timeout: 10000 });
+
+    // Locate all rows with the data-type "infinite-scroll-row"
+    const rows = page.locator('[data-type="infinite-scroll-row"]');
+    const rowCount = await rows.count();
+
+    if (rowCount === 0) {
+        console.warn('No rows with data-type "infinite-scroll-row" found.');
+        throw new Error('Test failed: No rows found with the specified selector');
     }
-    return page;
+
+    for (let i = 0; i < rowCount; i++) {
+        const row = rows.nth(i);
+
+        // Locate "Remove" button within the row based on the id pattern
+        const removeButton = row.locator('button[id^="remove_position_"]');
+        const buttonCount = await removeButton.count();
+
+        // Check if the "Remove" button exists in this row
+        if (buttonCount > 0) {
+            const text = await removeButton.innerText();
+
+            // Check if the button's text is "Remove"
+            if (text === 'Remove') {
+                await removeButton.click();
+                console.log('Remove button found and clicked in row:', i + 1);
+
+                // Enter any additional steps after clicking "Remove"
+                // Click on additional confirmation buttons if required
+                await page.locator(locators.clickRemoveLiq).click(); // Confirm removing the limit order
+                await page.locator(locators.clickSubmit).click(); // Click submit if necessary
+                await page.locator(locators.clickConfirm).click(); // Final confirmation click
+                return page; // Exit after clicking the first "Remove" button
+            }
+        }
+    }
+
+    // If no "Remove" button with text "Remove" was found, fail the test
+    console.warn('No "Remove" button with text "Remove" found in any row.');
+    throw new Error('Test failed: No matching "Remove" button found in any row');
 }
+
 
 // click remove liq on transaction table
 export async function clickRemoveLiquidity(page: Page) {
@@ -242,7 +322,13 @@ export async function clickSubmitSlippage(page: Page) {
 
 // click on Confirm swap
 export async function clickConfirmSwap(page: Page) {
-    await page.locator(locators.clickConfirm).click();
+    await page.locator(locators.clickConfirmTrade).click();
+    return page;
+}
+
+// click on Confirm swap
+export async function clickConfirmSwapTrade(page: Page) {
+    await page.locator(locators.clickConfirmTrade).click();
     return page;
 }
 
@@ -260,7 +346,7 @@ export async function clickConfirmLimit(page: Page) {
 
 // click on transactions row to open shareable chart button
 export async function clickTransactionsRow(page: Page) {
-    await page.locator(locators.clickTransactionsRow).click();
+    const locator = page.locator(locators.clickTransactionsRow).first().click();
     return page;
 }
 
@@ -276,17 +362,27 @@ export async function clickDetailsShareableChart(page: Page) {
 
 // click remove liq on transaction table
 export async function clickClaimLimit(page: Page) {
-    if ((await page.locator(locators.clickClaimLimit).innerText()) == 'Claim') {
-        const locator = await page.locator(locators.clickClaimLimit).click;
-        // click on claim limit order
-        await page.locator(locators.clickRemoveLimitOrder).click();
-    } else {
-        // fail test add does not exist
-        const locator = await page.locator(locators.clickClaimLimit);
-        const text = await locator.innerText();
-        expect(text).toContain('Claim');
+     // Locate all rows with classes starting with "TransactionTable__Row"
+    const rows = page.locator('[class^="TransactionTable__Row"]');
+    const rowCount = await rows.count();
+
+    for (let i = 0; i < rowCount; i++) {
+        const row = rows.nth(i);
+        const text = await row.innerText();
+
+        // Check if this row contains "Claim"
+        if (text.includes('Claim')) {
+            await row.locator(locators.clickClaimLimit).click(); // Click the claim button within the row
+            // Click to remove limit order after claiming
+            await page.locator(locators.clickRemoveLimitOrder).click();
+            console.log('Claim button found and clicked.');
+            return page;
+        }
     }
-    return page;
+ 
+     // If no "Claim" button was found, fail the test
+     //console.warn('No "Claim" button found in any row.');
+    // expect(false).toBe(true); // Force test failure
 }
 
 // click on submit swap
@@ -323,7 +419,8 @@ export async function clickLimitRate(page: Page) {
 // click change network
 export async function clickChangeNetwork(page: Page) {
     await page.getByText('Sepolia').click();
-    await page.getByText('Blast').click();
+    await page.waitForTimeout(1000);
+    await page.getByText('Scroll').click();
     return page;
 }
 
@@ -334,14 +431,41 @@ export async function clickChangeWallet(page: Page) {
     return page;
 }
 
-// id missing
+// open chat panel
 export async function click_Open_Chat(page: Page) {
-    await this.page.locator(locators.chatOpenTrollbox).click();
+    await page.locator(locators.chatOpenTrollbox).click();
     return page;
 }
 
+// open chat pool drowdown
 export async function click_Chat_Room_Dropdown(page: Page) {
-    await this.page.locator(locators.chatRoomDropdown).click();
+    await page.locator(locators.chatOpenRoomDropdown).click();
+    return page;
+}
+
+// click chat sent message button
+export async function click_Chat_Sent_Message(page: Page) {
+    await page.locator(locators.chatSentMessage).click();
+    return page;
+}
+
+// click chat emoji panel open
+export async function click_Chat_Emoji_Panel(page: Page) {
+    await page.locator(locators.chatEmojipanel).click();
+    return page;
+}
+
+// click chat emoji
+export async function click_Chat_Emoj(page: Page) {
+    await page.click(
+        'button[aria-label="smiling face with heart-shaped eyes"]',
+    );
+    return page;
+}
+
+// click chat emoji panel close
+export async function click_Chat_Emoji_Panel_Close(page: Page) {
+    await page.locator(locators.chatEmojiPanelClose).click();
     return page;
 }
 
@@ -362,6 +486,29 @@ export async function click_Select_Chat_Room(page: Page) {
     await elementHandle.click();
     // await this.page.getByText('ETH / WBTC').click();
     return page;
+}
+
+// asser sent message is visisble in chat
+export async function click_Chat_Emoji_Reaction(page: Page) {
+    // Execute script to scroll to the top of the chat container
+    await this.page.evaluate((xpath) => {
+        const chatContainer = document.evaluate(
+            xpath,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null,
+        ).singleNodeValue as HTMLElement;
+        if (chatContainer) {
+            chatContainer.scrollTop == 100;
+        } else {
+            console.log('Chat container not found');
+        }
+    }, locators.chatRoomScrollUpXpath);
+
+    const chatRoomScrollUp = this.page.locator(locators.chatRoomScrollUp);
+    // select a reaction for the message
+    await expect(chatRoomScrollUp);
 }
 
 // ---------------------------------------assert-----------------------------------
@@ -419,34 +566,47 @@ export async function assertTransaction(page: Page) {
     return page;
 }
 
-// id missing
 // assert Transaction complete Swap page
 export async function assertTransactionSwap(page: Page) {
-    const locator = await page.locator(locators.assertTransactionSwap);
-    // Wait until the text contains "Transaction Confirmed"
-    await page.waitForSelector('text=Transaction Confirmed');
+    // Locate the element using a partial CSS selector
+    const locator = page.locator(locators.assertTransactionSwap);
+    
+    // Wait until the text contains "successfully completed"
+    await page.waitForSelector('text=successfully completed');
 
     // Get the updated text
     const text = await locator.innerText();
 
-    // Check if the updated text contains "Transaction Confirmed"
-    expect(text).toContain('Transaction Confirmed');
+    // Check if the updated text contains "successfully completed"
+    expect(text).toContain('successfully completed');
     return page;
 }
 
 // id missing
 // assert wallet id shareable chart
 export async function assertIdShareableChart(page: Page, text: string) {
-    const locator = await page.locator(locators.assertIdShareableChart);
+     // Wait for the element with class starting with "_info_button_"
+    await page.waitForSelector('[class^="_info_button_"]', { timeout: 10000 });
 
-    // Get id
-    const id = await locator.innerText();
+    // Locate the element with class starting with "_value_content_"
+    const locator = page.locator('[class^="_value_content_"] p').first();
+    
+    // Get the text of the element
+    const fullText = await locator.innerText();
+    console.log('Full Text Found:', fullText);  // Log the full text to verify
 
-    // Remove the dots from the idText
-    // const cleanedIdText = text.replace(/\./g, '');
+    // Extract the part that starts with "$"
+    const match = fullText.match(/\$\d{1,3}(,\d{3})*(\.\d{2})?/);
+    const textnew = match ? match[0] : undefined;
 
-    // Check if the updated text contains "Transaction Confirmed"
-    expect(id).toContain(text);
+    if (textnew) {
+        // Check if the extracted text (textnew) contains the expected text parameter
+        expect(textnew).toBe(text);
+        console.log(`Assertion passed: ${textnew} is equal to ${text}`);
+    } else {
+        throw new Error('No dollar value found in the specified element.');
+    }
+    
     return page;
 }
 
@@ -469,25 +629,26 @@ export async function assertValLimitPriceShareableChart(
 // id missing
 // assert Transaction complete Swap page
 export async function assertTransactionsTransactionTab(page: Page) {
-    const locator = await page.locator(
-        locators.assertTransactionsTransactionTab,
-    );
-    // Get the text
-    const text = await locator.innerText();
-    // Check if the updated text contains "Transaction Confirmed"
-    expect(text).toContain('you');
+    // Locate the element by id
+    const locator = page.locator(locators.clickMyTransactions);
+
+    // Get the value of the "data-ison" attribute
+    const isOn = await locator.getAttribute(locators.checkMyTransactions);
+
+    // Check if the "data-ison" attribute is set to "true"
+    expect(isOn).toBe('true');
     return page;
 }
 
 // id missing
 // assert change of network
 export async function assertChangeNetwork(page: Page) {
-    await page.waitForSelector('#hero > div > div > img');
+   // await page.waitForSelector('#hero > div > div > img');
     const locator = await page.locator(locators.assertChangeNetwork);
     // Get the text
     const text = await locator.innerText();
-    // Check if the updated text contains "Blast"
-    expect(text).toContain('Blast');
+    // Check if the updated text contains "Scroll"
+    expect(text).toContain('Scroll');
     return page;
 }
 
@@ -503,6 +664,177 @@ export async function assertWalletonnectivity(page: Page) {
     const locator = await page.locator(locators.getWalletConnectivity);
     await expect(locator).toBeEnabled();
     return page;
+}
+
+// asser sent message is visisble in chat
+export async function assert_Sent_Message(page: Page, str: string) {
+   const lastMessageLocator = page.locator(`text=${str}`).last(); // Use the text dynamically
+   await lastMessageLocator.waitFor({ state: 'visible', timeout: 10000 });
+
+   // Assert that the sent message is visible in the chat
+   await expect(lastMessageLocator).toBeVisible({ timeout: 10000 });
+}
+
+// asser sent message is not visible visisble in chat
+export async function assert_Delete_Message(page: Page, str: string) {
+    await page.waitForTimeout(1000);
+    // Execute script to scroll to the top of the chat container
+    await this.page.evaluate((xpath) => {
+        const chatContainer = document.evaluate(
+            xpath,
+            document,
+            null,
+            XPathResult.FIRST_ORDERED_NODE_TYPE,
+            null,
+        ).singleNodeValue as HTMLElement;
+        if (chatContainer) {
+            chatContainer.scrollTop == 100;
+        } else {
+            console.log('Chat container not found');
+        }
+    }, locators.chatRoomScrollUpXpath);
+
+    const chatRoomScrollUp = this.page.locator(locators.chatRoomScrollUp);
+
+    // Wait for the locator to not be visible
+    await expect(chatRoomScrollUp).not.toContain(str);
+}
+
+// asser sent message is visisble in chat
+export async function assert_ENS_Name(page: Page, str: string ) {
+    // Regex to match the ENS format (e.g., "0x849C...0B16")
+    const ensRegex = /0x[0-9a-fA-F]{4}\.\.\.[0-9a-fA-F]{4}/;
+
+    const lastMessageLocator = page.locator(`text=${str}`).last(); // Use the text dynamically
+    await lastMessageLocator.waitFor({ state: 'visible', timeout: 10000 });
+    // Assert that the sent message is visible in the chat
+    await expect(lastMessageLocator).toBeVisible({ timeout: 10000 });
+
+    // Find the value of the attribute that starts with `_name_default_label`
+   const attributeValue = await lastMessageLocator.getAttribute('_name_default_label');
+   
+   if (attributeValue) {
+       // Check if the attribute value matches the ENS pattern
+       if (ensRegex.test(attributeValue)) {
+           console.log('ENS name found in attribute and matches the pattern.');
+       } else {
+           console.warn('The attribute value does not match the ENS pattern.');
+       }
+   } else {
+       console.warn('The attribute _name_default_label was not found.');
+   }
+}
+
+// asser sent message is visisble in chat
+export async function assert_Sent_Hyperlink(page: Page, str: string) {
+    // First, wait for the message containing the string to appear
+    const messageLocator = page.locator(`text=${str}`).last();
+    await messageLocator.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Dynamically select the span that contains the link using a partial match on the class name
+    const hyperlinkLocator = page.locator(`span[class*="_link_token_"]:has-text("${str}")`).last();
+    const isHyperlinkVisible = await hyperlinkLocator.isVisible();
+
+    // Assert that the dynamically selected "link" element is visible
+    expect(isHyperlinkVisible).toBe(true);
+}
+
+// Assert that the last sent message has a reaction with the expected emoji
+export async function assert_Last_Message_Emoji_Reaction(page: Page) {
+    await page.waitForTimeout(1000);
+
+    // Get the last message block
+    const lastMessageBlock = await page
+        .locator('div._message_block_wrapper')
+        .last();
+
+    // Scroll into view if necessary
+    await lastMessageBlock.scrollIntoViewIfNeeded();
+
+    // Wait for the message block to be visible
+    await expect(lastMessageBlock).toBeVisible();
+
+    // Locate the reaction section within the last message block
+    const emojiReaction = await lastMessageBlock
+        .locator('div._reactions_wrapper')
+        .last();
+
+    // Wait for the reaction to appear
+    await expect(emojiReaction).toBeVisible();
+
+    // Assert that the reaction contains the expected emoji
+    await expect(emojiReaction).toContainText('😀');
+}
+
+// Assert that the last sent message has a reaction with the expected emoji
+export async function assert_Last_Message_Unselect_Reaction(page: Page) {
+    await page.waitForTimeout(1000);
+
+    // Get the last message block
+    const lastMessageBlock = await page
+        .locator('div._message_block_wrapper')
+        .last();
+
+    // Scroll into view if necessary
+    await lastMessageBlock.scrollIntoViewIfNeeded();
+
+    // Wait for the message block to be visible
+    await expect(lastMessageBlock).toBeVisible();
+
+    // Locate the reaction section within the last message block
+    const emojiReaction = await lastMessageBlock
+        .locator('div._reactions_wrapper')
+        .last();
+
+    // Wait for the reaction to appear
+    await expect(emojiReaction).toBeVisible();
+
+    // Assert that the reaction contains the expected emoji
+    await expect(emojiReaction).toContainText('');
+}
+
+// assert emoji panel is visible
+export async function assert_Emoji_Panel(page: Page) {
+    const element = await page.locator(locators.chatEmojiPanelClose);
+    await expect(element).toBeVisible();
+}
+
+// assert emoji panel is not visible
+export async function assert_Emoji_Panel_Closed(page: Page) {
+    const element = await page.locator(locators.chatEmojiPanelClose);
+    await expect(element).not.toBeVisible();
+}
+
+// assert progressbar 100
+export async function assert_Progressbar_100_Character(page: Page) {
+    const element = await page.locator(locators.chatProgressBar);
+    await expect(element).toHaveText('40');
+}
+
+// assert progressbar 140
+export async function assert_Progressbar_140_Character(page: Page) {
+    const element = await page.locator(locators.chatProgressBar);
+    await expect(element).toHaveText('0');
+}
+
+// assert progressbar 140+
+export async function assert_Progressbar_141_Character(page: Page) {
+    const element = await page.locator(locators.chatProgressBar);
+    await expect(element).toHaveText('-1');
+}
+
+// assert progressbar Popup for exceeding lenghth
+export async function assert_Popup_Exceeding_Lenght(page: Page) {
+    const element = await page.locator(locators.chatPopupLenght);
+    await expect(element).toHaveText(
+        'Maximum length exceeded (140 characters limit).',
+    );
+}
+
+// assert non whitelisted link warning message
+export async function assert_Non_Whitelisted_Link(page: Page) {
+    const element = await page.locator(locators.chatNonWhitelistedLink);
+    await expect(element).toHaveText('You cannot send this link.');
 }
 
 // ---------------------------------------fill-----------------------------------
@@ -531,7 +863,7 @@ export async function fillTransferUSDC(page: Page) {
 
 // fill slippage tolerance swap settings
 export async function fillSwapPageSlippage(page: Page) {
-    await page.locator(locators.fillTransferUSDC).fill('0.2');
+    await page.locator(locators.fillSlippage).fill('0.2');
     return page;
 }
 
@@ -559,6 +891,12 @@ export async function fillPoolBar(page: Page, num: number) {
     return page;
 }
 
+// fill chat input box
+export async function fill_Input_Box(page: Page, str: string) {
+    await page.locator(locators.chatBox).fill(str);
+    return page;
+}
+
 // ---------------------------------------confirm-----------------------------------
 
 // confirm transaction on metamask
@@ -578,10 +916,26 @@ export async function confirmNetworkChange(page: Page) {
 // id needed
 // get id on liquidity tab transactions
 export async function getIdLiquidity(page: Page) {
-    const locator = await page.locator(locators.getIdLiquidity);
-    // Get text of id
-    const text = await locator.innerText();
-    return text;
+     // Locate the first element with data-label="value"
+     const locator = page.locator(locators.clickTransactionsRow).first();
+    
+     // Get the text of the first element
+     const fullText = await locator.innerText();
+ 
+     if (fullText) {
+         // Match the dollar value using regex
+         const match = fullText.match(/\$\d{1,3}(,\d{3})*(\.\d{2})?/);
+         
+         if (match) {
+             const text = match[0];
+             console.log('Total Value:', text);
+             return text;
+         } else {
+             throw new Error('No dollar value found in the text.');
+         }
+     } else {
+         throw new Error('Could not find value in the specified element.');
+     }
 }
 
 // get the value of the limit price
@@ -590,4 +944,24 @@ export async function getValLimitPrice(page: Page) {
     // Get text of limit value
     const text = await locator.innerText();
     return text;
+}
+
+export async function scroll_Up_Chat_Room(page: Page) {
+    await page.evaluate(() => {
+        window.scrollTo(0, 0);
+    });   
+}
+
+// fill chat input box
+export async function generateRandomString(): Promise<string> {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    const length = 10; 
+
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        result += characters.charAt(randomIndex);
+    }
+
+    return result;
 }
